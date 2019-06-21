@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,
+    maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="css/keyBoard.css">
+ 
+</head>
+<body>
+   <input type="text" id="inputBox" value="" placeholder="点击调用自定义键盘">
+  
+   <script>
+
+     function KeyBoard(targetId){
+          this.targetId=document.getElementById(targetId)
+          this.off=0;
+          this.val='';
+          this.typeChange='';
+          this.numWidth='31.333%';
+          this.aWidth='12%';
+          this.settings = {  // 默认参数
+              numArr :[1,2,3,4,5,6,7,8,9,0],
+              alphabetArr:['q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m']
+          }
+    }
+
+
+     KeyBoard.prototype={
+          init:function(){
+
+               this.keyBoardShow()
+          },
+          
+          render:function(arr,len,w,str){
+               var _this=this;
+              
+               var keyBoardDiv,keyBoardBg;
+               keyBoardBg=document.createElement('div')
+               keyBoardBg.className='keyBoardBg';
+               keyBoardBg.addEventListener('click',function(e){
+                    
+                    var targetDiv=document.querySelector('.keyBoardBg')
+                    if(e.target===targetDiv){
+
+                         _this.off=0;
+                         _this.clear()
+                    }
+                   
+               })
+               keyBoardDiv=document.createElement('div')
+               keyBoardDiv.id='keyBoardtable';
+               setTimeout(function(){
+                     keyBoardDiv.className = "table-up";                
+               });
+               var p=document.createElement('p');
+               p.id='commitBtn';
+               var span=document.createElement('span');
+               span.innerText='确定';
+               span.addEventListener('click',function(){
+                    _this.off=0;
+                    _this.clear()
+               })
+              
+               if(len==26){
+                    var span1=document.createElement('span');
+                    span1.innerText='a/A';
+                    span1.className='upcaseTolowcase';
+                    span1.addEventListener('click',function(){
+                       
+                        var spanTxt=document.querySelectorAll('.spanTxt');
+                        _this.upcaseTolowcase(spanTxt,this)
+                      
+                        
+                    })
+                 p.appendChild(span1)
+                }
+                p.appendChild(span)
+                keyBoardDiv.appendChild(p)
+               for(var i=0;i<len;i++){
+                  var tr=document.createElement('span');
+                  tr.style.width=w;
+                  tr.innerText=arr[i];
+                  tr.className='spanTxt';
+                  tr.addEventListener('click',function(){
+                    _this.keyBoardInput(this)
+                  })
+                  keyBoardDiv.appendChild(tr)
+               }
+               var td1=document.createElement('span');
+            
+               td1.innerText='⇦';
+               td1.style.width=w;
+               td1.style.color='#000';
+               td1.style.backgroundColor='#b8b8b8';
+               td1.addEventListener('click',function(){
+                    _this.delateInput()
+               })
+               var td2=document.createElement('span')
+               td2.innerText=str;//↹
+               td2.style.width=w;
+               td2.style.color='#000';
+               td2.style.backgroundColor='#b8b8b8';
+               td2.addEventListener('click',function(){
+                  _this.change()
+               })
+               keyBoardDiv.appendChild(td1)
+               keyBoardDiv.appendChild(td2)
+               keyBoardBg.appendChild(keyBoardDiv)
+               document.body.appendChild(keyBoardBg)
+         },
+          keyBoardShow:function(obj){
+               var _this=this;
+               try{
+                    this.targetId.addEventListener('focus',function(){
+                         document.activeElement.blur();
+                         var tableArr=[];
+                         var spanWidth='';
+                        
+                         if(_this.off==0){
+                              _this.off=1
+                              if(this.type==='number'){
+                                    tableArr=_this.settings.numArr;
+                                    spanWidth=_this.numWidth;
+                                    _this.typeChange='EN';
+                              }else{
+                                   tableArr=_this.settings.alphabetArr;
+                                   spanWidth=_this.aWidth;
+                                    _this.typeChange='123';
+                              }
+                              _this.render(tableArr,tableArr.length,spanWidth,_this.typeChange)
+                         }  
+                    })
+               }catch(e){
+
+                    this.err()
+
+               }
+               
+          },
+          keyBoardInput:function(obj){
+           
+               this.val+=obj.innerText;
+               if(this.targetId.tagName==='INPUT'){
+                    this.targetId.value=this.val;
+                   
+               }else{
+                    this.targetId.innerText=this.val;
+               };
+              
+          },
+          upcaseTolowcase:function(el,obj){
+              var len=el.length;
+            
+              if(obj.innerText=='a/A'){
+                  obj.innerText='A/a'
+              }else{
+                obj.innerText='a/A'
+              }
+              for(var i=0;i<len;i++){
+                  var str =el[i].innerText;
+                  if(/^[a-z]$/.test(str)){
+                    el[i].innerText = str.toUpperCase();
+                  }
+                  else if(/^[A-Z]$/.test(str)){
+                    el[i].innerText = str.toLowerCase(); 
+                  }
+              } 
+          },
+          delateInput:function(){
+               var _this=this;
+               if(_this.targetId.tagName==='INPUT'){
+                    _this.targetId.value=_this.targetId.value.slice(0,-1);
+                    _this.val=_this.targetId.value
+  
+               }else{
+                    _this.targetId.innerText=_this.targetId.innerText.slice(0,-1);
+                    _this.val=_this.targetId.innerText
+               };
+          },
+          change :function(){
+              var tableArr=[];
+              var spanWidth='';
+              if(this.typeChange=='123'){
+                    this.typeChange='EN'
+                  }else{
+                    this.typeChange='123'
+              }
+              if(this.off==1){
+                  this.off=0;
+                  tableArr=this.settings.numArr;
+                  spanWidth=this.numWidth;
+                  
+              }else{
+                  this.off=1;
+                    tableArr=this.settings.alphabetArr;
+                    spanWidth=this.aWidth;
+               }
+                this.clear();
+                this.render(tableArr,tableArr.length,spanWidth,this.typeChange);
+          },
+          clear:function(id){
+               var table=document.querySelector('.keyBoardBg')
+
+               setTimeout(function(){
+                     document.getElementById('keyBoardtable').className = "table-down";                
+               });
+               setTimeout(function(){
+                     document.getElementsByTagName('body')[0].removeChild(table)              
+               },500);
+              
+          },
+          err:function(){
+               var errDiv=document.createElement('div');
+               errDiv.className='keyBoardErrMsg';
+               errDiv.innerText='键盘未指定输入框id';
+               errDiv.className = "errMsg";
+               setTimeout(function(){
+                     errDiv.className = "keyBoardErrMsg keyBoardErrMsg-up";                
+               });
+               document.body.appendChild(errDiv)
+               setTimeout(function(){
+                    document.body.removeChild(errDiv)
+               },2000)   
+          }
+    }
+
+   
+     var key=new KeyBoard('inputBox')
+     key.init()
+   
+   </script>
+</body>
+</html>
