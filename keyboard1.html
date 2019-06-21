@@ -203,12 +203,8 @@
           clear:function(id){
                var table=document.querySelector('.keyBoardBg')
 
-               setTimeout(function(){
-                     document.getElementById('keyBoardtable').className = "table-down";                
-               });
-               setTimeout(function(){
-                     document.getElementsByTagName('body')[0].removeChild(table)              
-               },500);
+               document.getElementsByTagName('body')[0].removeChild(table)              
+             
               
           },
           err:function(){
