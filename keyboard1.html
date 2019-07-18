@@ -13,10 +13,11 @@
   
    <script>
 
-     function KeyBoard(targetId){
+       function KeyBoard(targetId,maxlength){
           this.targetId=document.getElementById(targetId)
           this.off=0;
           this.val='';
+          this.maxlength=maxlength;
           this.typeChange='';
           this.numWidth='31.333%';
           this.aWidth='12%';
@@ -25,6 +26,7 @@
               alphabetArr:['q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m']
           }
     }
+
 
 
      KeyBoard.prototype={
@@ -36,16 +38,15 @@
           render:function(arr,len,w,str){
                var _this=this;
               
-               var keyBoardDiv,keyBoardBg;
+               var keyBoardTxt,keyBoardDiv,keyBoardBg;
                keyBoardBg=document.createElement('div')
                keyBoardBg.className='keyBoardBg';
                keyBoardBg.addEventListener('click',function(e){
                     
                     var targetDiv=document.querySelector('.keyBoardBg')
                     if(e.target===targetDiv){
-
                          _this.off=0;
-                         _this.clear()
+                        this.parentNode.removeChild(this)
                     }
                    
                })
@@ -56,28 +57,38 @@
                });
                var p=document.createElement('p');
                p.id='commitBtn';
+
+               var span1=document.createElement('span');
+               span1.innerText='a/A';
+               span1.className='upcaseTolowcase';
+               span1.style.display='none';
+               if(len==26){
+                span1.style.display='inline-block';   
+                }
+               span1.addEventListener('click',function(){
+                   
+                    var spanTxt=document.querySelectorAll('.spanTxt');
+                    _this.upcaseTolowcase(spanTxt,this)
+                    
+                })
+                
+               p.appendChild(span1)
+               
+
                var span=document.createElement('span');
                span.innerText='确定';
                span.addEventListener('click',function(){
+                    var table=document.querySelector('.keyBoardBg')
                     _this.off=0;
-                    _this.clear()
+                    this.parentNode.parentNode.parentNode.parentNode.removeChild(table)
                })
               
-               if(len==26){
-                    var span1=document.createElement('span');
-                    span1.innerText='a/A';
-                    span1.className='upcaseTolowcase';
-                    span1.addEventListener('click',function(){
-                       
-                        var spanTxt=document.querySelectorAll('.spanTxt');
-                        _this.upcaseTolowcase(spanTxt,this)
-                      
-                        
-                    })
-                 p.appendChild(span1)
-                }
                 p.appendChild(span)
+               
                 keyBoardDiv.appendChild(p)
+                keyBoardTxt=document.createElement('div');
+                keyBoardTxt.id='keyBoardTxt';
+
                for(var i=0;i<len;i++){
                   var tr=document.createElement('span');
                   tr.style.width=w;
@@ -86,10 +97,10 @@
                   tr.addEventListener('click',function(){
                     _this.keyBoardInput(this)
                   })
-                  keyBoardDiv.appendChild(tr)
+                  keyBoardTxt.appendChild(tr)
                }
+
                var td1=document.createElement('span');
-            
                td1.innerText='⇦';
                td1.style.width=w;
                td1.style.color='#000';
@@ -97,16 +108,19 @@
                td1.addEventListener('click',function(){
                     _this.delateInput()
                })
+               
                var td2=document.createElement('span')
                td2.innerText=str;//↹
                td2.style.width=w;
                td2.style.color='#000';
                td2.style.backgroundColor='#b8b8b8';
                td2.addEventListener('click',function(){
+                 console.log(this)
                   _this.change()
                })
-               keyBoardDiv.appendChild(td1)
-               keyBoardDiv.appendChild(td2)
+               keyBoardTxt.appendChild(td1)
+               keyBoardTxt.appendChild(td2)
+               keyBoardDiv.appendChild(keyBoardTxt);
                keyBoardBg.appendChild(keyBoardDiv)
                document.body.appendChild(keyBoardBg)
          },
@@ -114,23 +128,23 @@
                var _this=this;
                try{
                     this.targetId.addEventListener('focus',function(){
-                         document.activeElement.blur();
-                         var tableArr=[];
-                         var spanWidth='';
+                       document.activeElement.blur();
+                       var tableArr=[];
+                       var spanWidth='';
                         
-                         if(_this.off==0){
-                              _this.off=1
-                              if(this.type==='number'){
-                                    tableArr=_this.settings.numArr;
-                                    spanWidth=_this.numWidth;
-                                    _this.typeChange='EN';
-                              }else{
-                                   tableArr=_this.settings.alphabetArr;
-                                   spanWidth=_this.aWidth;
-                                    _this.typeChange='123';
-                              }
-                              _this.render(tableArr,tableArr.length,spanWidth,_this.typeChange)
-                         }  
+                        if(this.type==='number'){
+                              tableArr=_this.settings.numArr;
+                              spanWidth=_this.numWidth;
+                              _this.typeChange='EN';
+                              _this.off=1;
+                        }else{
+                             tableArr=_this.settings.alphabetArr;
+                             spanWidth=_this.aWidth;
+                              _this.typeChange='123';
+                              _this.off=0
+                        }
+                        _this.render(tableArr,tableArr.length,spanWidth,_this.typeChange)
+                         
                     })
                }catch(e){
 
@@ -141,7 +155,13 @@
           },
           keyBoardInput:function(obj){
            
+               
                this.val+=obj.innerText;
+               var len = this.val.length;
+               
+               if(len>this.maxlength){
+                  this.val=this.val.slice(0,this.maxlength)
+               }
                if(this.targetId.tagName==='INPUT'){
                     this.targetId.value=this.val;
                    
@@ -179,32 +199,66 @@
                     _this.val=_this.targetId.innerText
                };
           },
-          change :function(){
-              var tableArr=[];
-              var spanWidth='';
+         
+          change:function(){
+              this.clear();
+              var tempArr=[];
+              var w=0;
+              var _this=this;
+              var table=document.getElementById('keyBoardTxt');
               if(this.typeChange=='123'){
                     this.typeChange='EN'
-                  }else{
+              }else{
                     this.typeChange='123'
               }
-              if(this.off==1){
-                  this.off=0;
-                  tableArr=this.settings.numArr;
-                  spanWidth=this.numWidth;
+
+              if(this.off==0){
+                  this.off=1;
+                  document.querySelector('.upcaseTolowcase').style.display='none';
+                  tempArr=this.settings.numArr;
+                  w=this.numWidth;
                   
               }else{
-                  this.off=1;
-                    tableArr=this.settings.alphabetArr;
-                    spanWidth=this.aWidth;
-               }
-                this.clear();
-                this.render(tableArr,tableArr.length,spanWidth,this.typeChange);
+                  this.off=0;
+                  document.querySelector('.upcaseTolowcase').style.display='inline-block'
+                  tempArr=this.settings.alphabetArr;
+                  w=this.aWidth;
+               } 
+             
+              for(var i=0;i<tempArr.length;i++){
+                  var tr=document.createElement('span');
+                  tr.style.width=w;
+                  tr.innerText=tempArr[i];
+                  tr.className='spanTxt';
+                  tr.addEventListener('click',function(){
+                    _this.keyBoardInput(this)
+                  })
+                  table.appendChild(tr)
+              }
+               var td1=document.createElement('span');
+               td1.innerText='⇦';
+               td1.style.width=w;
+               td1.style.color='#000';
+               td1.style.backgroundColor='#b8b8b8';
+               td1.addEventListener('click',function(){
+                    _this.delateInput()
+               })
+               var td2=document.createElement('span')
+               td2.innerText=this.typeChange;//↹
+               td2.style.width=w;
+               td2.style.color='#000';
+               td2.style.backgroundColor='#b8b8b8';
+               td2.addEventListener('click',function(){
+
+                  _this.change()
+               })
+               table.appendChild(td1)
+               table.appendChild(td2)
+               
           },
           clear:function(id){
-               var table=document.querySelector('.keyBoardBg')
-
-               document.getElementsByTagName('body')[0].removeChild(table)              
-             
+                var table=document.querySelector('#keyBoardTxt')
+                table.innerHTML='';              
               
           },
           err:function(){
@@ -221,6 +275,7 @@
                },2000)   
           }
     }
+
 
    
      var key=new KeyBoard('inputBox')
